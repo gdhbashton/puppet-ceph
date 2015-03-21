@@ -152,7 +152,7 @@ class ceph::repo (
             priority   => '10', # prefer ceph repos over EPEL
             tag        => 'ceph',
           }
-        else {
+        } else {
           err('Ceph extras is not supported on RHEL/CentOS 7')
         }
       }
