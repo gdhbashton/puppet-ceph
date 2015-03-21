@@ -130,7 +130,7 @@ class ceph::repo (
         enabled    => $enabled,
         descr      => 'External Ceph noarch',
         name       => "ext-ceph-${release}-noarch",
-        baseurl    => "http://ceph.com/rpm-${release}/${operatingsystemmajrelease}/noarch",
+        baseurl    => "http://ceph.com/rpm-${release}/el${operatingsystemmajrelease}/noarch",
         gpgcheck   => '1',
         gpgkey     => 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc',
         mirrorlist => absent,
