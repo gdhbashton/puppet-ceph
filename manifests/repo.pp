@@ -98,15 +98,16 @@ class ceph::repo (
 
     'RedHat': {
       $enabled = $ensure ? { 'present' => '1', 'absent' => '0', default => absent, }
-      yumrepo { 'ext-epel-6.8':
+
+      yumrepo { 'ext-ceph-epel':
         # puppet versions prior to 3.5 do not support ensure, use enabled instead
         enabled    => $enabled,
-        descr      => 'External EPEL 6.8',
-        name       => 'ext-epel-6.8',
+        descr      => 'External EPEL via Ceph',
+        name       => 'ext-ceph-epel',
         baseurl    => absent,
         gpgcheck   => '0',
         gpgkey     => absent,
-        mirrorlist => 'http://mirrors.fedoraproject.org/metalink?repo=epel-6&arch=$basearch',
+        mirrorlist => "http://mirrors.fedoraproject.org/metalink?repo=epel-${operatingsystemmajrelease}&arch=\$basearch",
         priority   => '20', # prefer ceph repos over EPEL
         tag        => 'ceph',
       }
@@ -116,7 +117,7 @@ class ceph::repo (
         enabled    => $enabled,
         descr      => "External Ceph ${release}",
         name       => "ext-ceph-${release}",
-        baseurl    => "http://ceph.com/rpm-${release}/el6/\$basearch",
+        baseurl    => "http://ceph.com/rpm-${release}/el${operatingsystemmajrelease}/\$basearch",
         gpgcheck   => '1',
         gpgkey     => 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc',
         mirrorlist => absent,
@@ -129,7 +130,7 @@ class ceph::repo (
         enabled    => $enabled,
         descr      => 'External Ceph noarch',
         name       => "ext-ceph-${release}-noarch",
-        baseurl    => "http://ceph.com/rpm-${release}/el6/noarch",
+        baseurl    => "http://ceph.com/rpm-${release}/${operatingsystemmajrelease}/noarch",
         gpgcheck   => '1',
         gpgkey     => 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc',
         mirrorlist => absent,
@@ -138,19 +139,22 @@ class ceph::repo (
       }
 
       if $extras {
+        if $operatingsystemmajrelease == "6" {
 
-        yumrepo { 'ext-ceph-extras':
-          enabled    => $enabled,
-          descr      => 'External Ceph Extras',
-          name       => 'ext-ceph-extras',
-          baseurl    => 'http://ceph.com/packages/ceph-extras/rpm/rhel6/$basearch',
-          gpgcheck   => '1',
-          gpgkey     => 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc',
-          mirrorlist => absent,
-          priority   => '10', # prefer ceph repos over EPEL
-          tag        => 'ceph',
+          yumrepo { 'ext-ceph-extras':
+            enabled    => $enabled,
+            descr      => 'External Ceph Extras',
+            name       => 'ext-ceph-extras',
+            baseurl    => 'http://ceph.com/packages/ceph-extras/rpm/rhel6/$basearch',
+            gpgcheck   => '1',
+            gpgkey     => 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/release.asc',
+            mirrorlist => absent,
+            priority   => '10', # prefer ceph repos over EPEL
+            tag        => 'ceph',
+          }
+        else {
+          err('Ceph extras is not supported on RHEL/CentOS 7')
         }
-
       }
 
       if $fastcgi {
@@ -159,7 +163,7 @@ class ceph::repo (
           enabled    => $enabled,
           descr      => 'FastCGI basearch packages for Ceph',
           name       => 'ext-ceph-fastcgi',
-          baseurl    => 'http://gitbuilder.ceph.com/mod_fastcgi-rpm-rhel6-x86_64-basic/ref/master',
+          baseurl    => 'http://gitbuilder.ceph.com/mod_fastcgi-rpm-rhel${operatingsystemmajrelease}-x86_64-basic/ref/master',
           gpgcheck   => '1',
           gpgkey     => 'https://ceph.com/git/?p=ceph.git;a=blob_plain;f=keys/autobuild.asc',
           mirrorlist => absent,
