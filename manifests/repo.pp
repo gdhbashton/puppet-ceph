@@ -178,6 +178,11 @@ class ceph::repo (
       # prefer ceph repos over EPEL
       package { 'yum-plugin-priorities':
         ensure => present,
+      } ->
+
+      file { '/etc/yum/pluginconf.d/priorities.conf':
+        ensure  => present,
+        content => "[main]\nenabled = 1\ncheck_obsoletes = 1\n",
       }
 
     }
