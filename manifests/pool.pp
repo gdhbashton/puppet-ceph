@@ -43,11 +43,16 @@
 #   Optional. Default is undef.
 #   Increase or decrease the replica level of a pool.
 #
+# [*min_size*] Minimum level for the pool.
+#   Optional. Default is undef.
+#   Increase or decrease the minimum replica level of a pool for IO to be permitted
+#
 define ceph::pool (
   $ensure = present,
   $pg_num = 64,
   $pgp_num = undef,
   $size = undef,
+  $min_size = undef,
 ) {
 
   if $ensure == present {
@@ -94,6 +99,18 @@ ceph osd pool set ${name} size ${size}",
         unless  => "/bin/true # comment to satisfy puppet syntax requirements
 set -ex
 test $(ceph osd pool get ${name} size | sed 's/.*:\s*//g') -eq ${size}",
+        require => Exec["create-${name}"],
+      }
+    }
+
+    if $min_size {
+      exec { "set-${name}-min_size":
+        command => "/bin/true # comment to satisfy puppet syntax requirements
+set -ex
+ceph osd pool set ${name} min_size ${size}",
+        unless  => "/bin/true # comment to satisfy puppet syntax requirements
+set -ex
+test $(ceph osd pool get ${name} min_size | sed 's/.*:\s*//g') -eq ${min_size}",
         require => Exec["create-${name}"],
       }
     }
